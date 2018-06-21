@@ -97,18 +97,16 @@ let rec filter f = function
   |x:: rest when f x -> x::filter  f rest
   |x :: rest ->filter f rest ;;
 
-(*let rec quicker l sorted =
+let rec quicker l sorted =
   match l with
-    [] -> sorted
-    |[x] -> x::sorted
-    |x:xs -> let max_list xs =
-                  let rec iter a = function
-                  [] -> a
-                  |y::ys -> if y > a then iter y ys else iter a ys
-                in match xs with
-                [] -> []
-                |y::ys ->iter y ys
-             in quicker x *)
+  [] -> sorted
+  |x :: xs ->
+    let rec partition left right = function
+    [] -> quicker left (x:: (quicker right sorted))
+    |y::ys -> if x < y then partition left (y :: right) ys
+              else partition(y::left) right ys
+    in partition [] [] xs;;
+
 
 
 
@@ -118,12 +116,13 @@ let rec filter f = function
   |[x] -> [x]
   |x::xs ->
     let rec partition left right = function
-      [] -> quicker left (x::quick right)
+      [] -> (quick left) @ (x :: quick right)
       |y::ys -> if x < y then partition left (y :: right) ys
                 else partition(y::left) right ys
-      in partition [] [] xs;;
+      in partition [] [] xs;;*)
 
-quick [10; 9; 8; 11; 1];;*)
+(*quicker [10; 9; 8; 11; 1] [];;*)
+
 type nat = Zero|OneMoreThan of nat;;
 
 let rec int_of_nat n = match n with
@@ -149,3 +148,100 @@ let rec monus m n =
                     Zero -> Zero
                     |OneMoreThan m' -> monus m' n' ;;
 (*monus two Zero;;*)
+
+type 'a tree = Lf | Br of 'a * 'a tree * 'a tree;;
+(*let comptree = Br ( 1 , Br(2,Br(4,Lf,Lf),Br(5,Lf,Lf)) , Br(3,Br(6,Lf,Lf),Br(7,Lf,Lf)) )*)
+
+let rec reflect t =
+  match t with
+  Lf -> Lf
+  |Br(x,left,right) -> Br(x , reflect right , reflect left);;
+
+
+(*reflect comptree;;*)
+
+let  rec preorder = function
+  Lf -> []
+  |Br(x,left,right) ->  (preorder left)@ [x]  @(preorder right) ;;
+
+(*preorder ( comptree);;*)
+
+(* answer
+  preorder(reflect(t)) = reverse(postorder(t))[1; 3; 7; 6; 2; 5; 4]
+  inorder(reflect(t)) = reverse(inorder(t))[7; 3; 6; 1; 5; 2; 4]
+  postorder(reflect(t)) = reverse(preorder(t))[7; 6; 5; 4; 3; 2; 1]
+*)
+
+type 'a seq = Cons of 'a * (unit -> 'a seq);;
+
+let rec from n = Cons (n , fun () -> from (n+1));;
+
+from 2;;
+
+let head (Cons (x , _)) = x;;
+
+let tail(Cons(_, f))= f();;
+
+let rec take n s =
+  if n = 0 then []
+  else head s :: take (n-1) (tail s);;
+
+let rec sift n (Cons(x , f)) =
+ if x mod n = 0 then sift n (f())
+ else Cons (x , fun () -> sift n (f()));;
+
+let rec sieve (Cons (x , f)) =
+  Cons (x , fun () -> sieve (sift x (f())));;
+
+let primes = sieve (from 2);;
+
+take 20 primes;;
+
+type ('a , 'b) sum = Left of 'a | Right of 'b;;
+
+let  f1 (apple , select) =
+ match select with
+ Left i  ->   Left (apple , i)
+ |Right  j -> Right (apple , j);;
+
+let f2 (abstract , compactdisc) =
+match abstract with
+Left l -> (match compactdisc with
+          Left le -> Left (Left (l , le))
+          |Right ri -> Right (Left(l , ri)))
+|Right r -> (match compactdisc with
+           Left le -> Right (Right (r , le))
+           |Right ri ->  Left (Right (r , ri)));;
+
+(*let x = ref 3;;*)
+let incr i = i := (!i)+1;;
+(*incr x;;
+!x;;*)
+
+let fact_imp n =
+  let i = ref n and res = ref 1 in
+    while (!i >= 1) do
+     res := !res * !i;
+     i := (!i) - 1;
+    done;
+    !res;;
+
+(*fact_imp 6;;*)
+
+(* Ex.7.6
+  はじめ、x(ref [])の型は'_weak1 listという弱い多相型となる。
+　これは、[]に型のある値がconsされるとxの型は、consする値の型に「一度だけ」変わる。
+　だから、[]に1がconsされた時点で型はint listに変更され変わらなくなるため、
+　trueを[1]にconsしようとすると型エラーとなり、consできない。
+*)
+
+let rec change = function
+  (_ , 0) -> []
+  |((c::rest) as coins , total) ->
+    if c > total then change (rest , total)
+    else
+      (try
+        c :: change (coins , total - c)
+        with (Failure "change") -> change(rest , total))
+  |_ -> raise (Failure "change");;
+change ([5; 2] , 16);;
