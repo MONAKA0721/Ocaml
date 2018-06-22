@@ -11,7 +11,8 @@ open Syntax
 (*define token for fun formula (-> & fun)*)
 %token REC
 (* define token for let rec formula *)
-
+%token OR AND
+(* define token for and & or *)
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -26,7 +27,7 @@ toplevel :
     (*if recieve let id = exp;;
       then raise decl(x , e)
     *)
-    (*|LET REC x=ID EQ FUN y=ID RARROW e=Expr SEMISEMI { RecDecl (x , y , e)}*)
+    |LET REC x=ID EQ FUN y=ID RARROW e=Expr SEMISEMI { RecDecl (x , y , e)}
 
 Expr :
     e=IfExpr { e }
@@ -35,8 +36,10 @@ Expr :
   | e=LTExpr { e }
   | e=FunExpr { e }
   (*apply code Expr --> FunExpr and execute action e *)
-  (*| e=LetRecExpr { e }*)
-  (**)
+  | e=LetRecExpr { e }
+  (* Expr -> LetRecExp and evaluate e *)
+  | e=ORExpr { e }
+
 
 LTExpr :
     l=PExpr LT r=PExpr { BinOp (Lt, l, r) }
@@ -52,6 +55,14 @@ MExpr :
   (* MExpr -> MExpr(e1) MULT AppExpr(e2) and evaluate BinOp (Mult,e1,e2)
     or MExpr -> AppExpr and evaluate e(AppExpr)
   *)
+ORExpr :
+    l=ORExpr OR r=ANDExpr { BinOp (Or , l , r ) }
+  | e=ANDExpr { e }
+
+ANDExpr :
+    l=ANDExpr AND r=LTExpr {BinOp(And , l , r)}
+  | e=LTExpr { e }
+
 
 AExpr :
     i=INTV { ILit i }
@@ -80,5 +91,5 @@ FunExpr :
   FUN x=ID RARROW e=Expr { FunExp (x , e) }
   (* FunExp -> FUN ID(x) RARROW Expr(e) and evaluate FunExp(x , e) *)
 
-(*LetRecExpr :
-  LET REC x=ID EQ FUN y=ID RARROW e1=Expr IN e2=Expr { LetRecExp (x , y , e1 , e2) }*)
+LetRecExpr :
+  LET REC x=ID EQ FUN y=ID RARROW e1=Expr IN e2=Expr { LetRecExp (x , y , e1 , e2) }

@@ -1,7 +1,7 @@
 (* ML interpreter / type reconstruction *)
 type id = string
 
-type binOp = Plus | Mult | Lt
+type binOp = Plus | Mult | Lt | Or | And
 
 type exp =
   | Var of id (* Var "x" --> x *)
@@ -26,7 +26,7 @@ type exp =
     AppExp(AppExp(FunExp(f) , ILit 4))
      --> f 4
   *)
-  (*| LetRecExp of id * id * exp * exp*)
+  | LetRecExp of id * id * exp * exp
   (* define let rec formula
     LetRecExp ( Var "fact" , Var "n" , IfExp(BinOp( , ) , ILit 1 , BinOp(Mult , Var "n" , AppExp(Var "fact" , BinOp( , Var "n" , 1)))) , AppExp (Var "f" , ILit 5))
       --> let rec fact n = if n = 0 then 1 else n * (fact (n - 1)) in f 5
@@ -36,5 +36,5 @@ type program =
     Exp of exp
     | Decl of id * exp
     (* declare let formula *)
-    (*| RecDecl of id * id * exp*)
+    | RecDecl of id * id * exp
     (* declare let rec formula *)

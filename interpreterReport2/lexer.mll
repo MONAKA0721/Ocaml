@@ -11,7 +11,7 @@ let reservedWords = [
   (* define token for let formula *)
   ("fun" , Parser.FUN);
   (* define token for fun formula *)
-  (*("rec" , Parser.REC);*)
+  ("rec" , Parser.REC);
   (* define token for let rec formula*)
 ]
 }
@@ -31,6 +31,8 @@ rule main = parse
 | "<" { Parser.LT }
 | "=" { Parser.EQ } (*define "=" *)
 | "->" { Parser.RARROW } (*define "->" *)
+| "&&" { Parser.AND } (* define and *)
+| "||" { Parser.OR } (* define or *)
 
 | ['a'-'z'] ['a'-'z' '0'-'9' '_' '\'']*
     { let id = Lexing.lexeme lexbuf in
@@ -39,4 +41,18 @@ rule main = parse
       with
       _ -> Parser.ID id
      }
+| "(*" { (*print_endline "comments start";*) comments 0 lexbuf }
 | eof { exit 0 }
+
+and comments level = parse
+| "*)" { (*Printf.printf "comments (%d) end\n"*) level;
+if level = 0 then main lexbuf
+else comments (level-1) lexbuf
+}
+| "(*" { (*Printf.printf "comments (%d) start\n"*) (level+1);
+comments (level+1) lexbuf
+}
+| _ { comments level lexbuf }
+| eof { print_endline "comments are not closed";
+raise End_of_file
+}
