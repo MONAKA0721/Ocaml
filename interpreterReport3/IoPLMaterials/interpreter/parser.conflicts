@@ -1,0 +1,28 @@
+
+** Conflict (reduce/reduce) in state 36.
+** Tokens involved: THEN SEMISEMI RPAREN IN ELSE
+** The following explanations concentrate on token SEMISEMI.
+** This state is reached from toplevel after reading:
+
+LTExpr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+toplevel 
+Expr SEMISEMI // lookahead token appears
+(?)
+
+** In state 36, looking ahead at SEMISEMI, reducing production
+** ANDExpr -> LTExpr 
+** is permitted because of the following sub-derivation:
+
+ORExpr // lookahead token is inherited
+ANDExpr // lookahead token is inherited
+LTExpr . 
+
+** In state 36, looking ahead at SEMISEMI, reducing production
+** Expr -> LTExpr 
+** is permitted because of the following sub-derivation:
+
+LTExpr . 

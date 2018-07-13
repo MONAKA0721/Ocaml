@@ -39,6 +39,7 @@ Expr :
   | e=LetRecExpr { e }
   (* Expr -> LetRecExp and evaluate e *)
   | e=ORExpr { e }
+  (* Expr -> ORExpr and evaluate e *)
 
 
 LTExpr :

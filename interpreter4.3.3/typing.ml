@@ -9,7 +9,7 @@ let err s = raise (Error s)
 (* Type Environment *)
 type tyenv = ty Environment.t
 
-let rec subst_type subst t = match t with
+let rec subst_type subst t :ty= match t with
   TyInt -> TyInt
   | TyBool -> TyBool
   | TyVar tyvar ->(match subst with
@@ -21,13 +21,15 @@ let rec subst_type subst t = match t with
     )
   | TyFun (ty1 , ty2) -> TyFun(subst_type subst ty1 , subst_type subst ty2)
 
-(*let eqs_of_subst s = *)
+let eqs_of_subst s : (ty * ty) list=
+  let f  = fun (tyvar , ty) -> (TyVar tyvar , ty)
+  in List.map f s
 
-let subst_eqs s eqs =
+let subst_eqs s eqs : (ty * ty) list=
     let f x =  (subst_type s (fst x) , subst_type s (snd x))
     in List.map f eqs
 
-let rec unify l = match l with
+let rec unify l  = match l with
   [] -> []
   | x::rest -> if fst x = snd x then unify rest
               else match x with

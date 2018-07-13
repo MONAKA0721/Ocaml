@@ -50,6 +50,8 @@ let rec eval_exp env = function
       else
       let arg2 = eval_exp env exp2 in
       apply_prim op arg1 arg2
+      (* &&や||の右側の式の値の評価が停止できなくなった場合でも、
+      左側だけで値を求められるようにするための定義 *)
   | IfExp (exp1, exp2, exp3) ->
       let test = eval_exp env exp1 in
         (match test with

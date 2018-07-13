@@ -49,9 +49,11 @@ type ty =
 
 
 
-let pp_ty = function
+let rec pp_ty = function
   TyInt -> print_string "int"
  |TyBool -> print_string "bool"
+ | TyVar tyvar -> print_string "'a"
+ | TyFun (ty1 , ty2) -> pp_ty ty1; print_string "->"; pp_ty ty2
 
 let fresh_tyvar =
   let counter = ref 0 in
@@ -61,7 +63,7 @@ let fresh_tyvar =
       v
     in body
 
-let rec freevar_ty ty =
+let rec freevar_ty ty :tyvar MySet.t=
   match ty with
   TyInt -> MySet.empty
   |TyBool -> MySet.empty
